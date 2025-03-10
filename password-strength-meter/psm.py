@@ -4,27 +4,55 @@ import random
 import string
 
 # Page styling
-st.set_page_config(page_title="🔐 Password Strength Meter By Qirat Mehmood Ali", page_icon="🔐", layout="centered")
+st.set_page_config(page_title="🔐 Password Strength Meter", page_icon="🔐", layout="centered")
 
-# Custom CSS for better styling with background fix
-st.markdown("""
+# Apply background with pink gradient contrast
+st.markdown(
+    """
     <style>
-        /* Apply a gradient background */
-        html, body, [data-testid="stAppViewContainer"] {
-            background: linear-gradient(to right, #ff9a9e, #fad0c4);
-        }
-        .main {text-align: center;}
-        .stTextInput>div>div>input {border: 2px solid #4CAF50; border-radius: 10px; padding: 10px; width: 80%;}
-        .stButton>button {background-color: #4CAF50; color: white; font-size: 18px; border-radius: 8px; padding: 10px 20px; width: 80%;}
-        .stButton>button:hover {background-color: #45a049;}
-        .st-expander {background-color: #ffcc00; border-radius: 10px;}
-        .strength-bar {height: 10px; border-radius: 5px; margin-top: 10px;}
+    .stApp {
+        background: linear-gradient(to right, #ff9a9e, #fad0c4);
+        font-family: Arial, sans-serif;
+    }
+    .stTextInput>div>div>input {
+        border: 2px solid #FF4081;
+        border-radius: 10px;
+        padding: 10px;
+        background-color: #fff0f5;
+    }
+    .stButton>button {
+        background-color: #FF4081;
+        color: white;
+        font-size: 18px;
+        border-radius: 8px;
+        padding: 10px 20px;
+        transition: 0.3s;
+        border: none;
+    }
+    .stButton>button:hover {
+        background-color: #E91E63;
+    }
+    .st-expander {
+        background-color: #ff80ab;
+        border-radius: 10px;
+    }
+    .strength-bar {
+        width: 100%;
+        height: 10px;
+        border-radius: 5px;
+        margin-top: 10px;
+    }
+    .weak { background-color: #FF0000; }
+    .moderate { background-color: #FFA500; }
+    .strong { background-color: #4CAF50; }
     </style>
-""", unsafe_allow_html=True)
+    """,
+    unsafe_allow_html=True
+)
 
 # Page title and description
-st.title("🔐 Password Strength Checker")
-st.markdown("<h4 style='text-align: center; color: #4CAF50;'>Ensure your password is strong and secure! 🔍</h4>", unsafe_allow_html=True)
+st.title("🔐 Password Strength Meter")
+st.markdown("<h4 style='text-align: center; color: #FF4081;'>Ensure your password is strong and secure! 🔍</h4>", unsafe_allow_html=True)
 
 # Function to check password strength
 def check_password_strength(password):
@@ -54,16 +82,16 @@ def check_password_strength(password):
     # Display password strength result
     if score == 4:
         st.success("✅ **Strong Password** - Your password is secure and strong!")
-        bar_color = "green"
+        strength_color = "strong"
     elif score == 3:
         st.info("⚠️ **Moderate Password** - Consider improving security by adding more features.")
-        bar_color = "orange"
+        strength_color = "moderate"
     else:
         st.error("❌ **Weak Password** - Follow the suggestions below to strengthen it.")
-        bar_color = "red"
-    
-    # Password strength meter
-    st.markdown(f'<div class="strength-bar" style="width:{score * 25}%; background-color:{bar_color};"></div>', unsafe_allow_html=True)
+        strength_color = "weak"
+
+    # Password Strength Bar
+    st.markdown(f"<div class='strength-bar {strength_color}'></div>", unsafe_allow_html=True)
     
     # Feedback section
     if feedback:
@@ -71,15 +99,20 @@ def check_password_strength(password):
             for item in feedback:
                 st.write(f"- {item}")
 
-# Function to generate a random password
-def generate_password(length=12, use_specials=True):
-    characters = string.ascii_letters + string.digits
-    if use_specials:
-        characters += "!@#$%&^*"
-    return ''.join(random.choice(characters) for _ in range(length))
+# Function to generate a random strong password
+def generate_password():
+    characters = string.ascii_letters + string.digits + "!@#$%&^*"
+    return ''.join(random.choice(characters) for i in range(12))
 
 # Password input field
-password = st.text_input("Enter your password:", type="password", help="Ensure your password is strong 🔐")
+col1, col2 = st.columns([4, 1])
+with col1:
+    password = st.text_input("Enter your password:", type="password", help="Use a mix of uppercase, lowercase, numbers, and symbols.")
+
+with col2:
+    if st.button("🔄 Generate"):
+        password = generate_password()
+        st.text_input("Generated Password:", password, type="password", disabled=True)
 
 # Button to check password strength
 if st.button("Check Strength"):
@@ -87,11 +120,4 @@ if st.button("Check Strength"):
         check_password_strength(password)
     else:
         st.warning("⚠️ Please enter a password first!")
-
-# Random password generator
-st.markdown("### Generate a Strong Password 🔄")
-password_length = st.slider("Select Password Length", 8, 20, 12)
-include_specials = st.checkbox("Include Special Characters (!@#$%&^*)", value=True)
-if st.button("🔄 Generate Password"):
-    generated_password = generate_password(password_length, include_specials)
-    st.text_input("Generated Password:", generated_password, type="password", disabled=True)
+        
